@@ -12,7 +12,7 @@ RUN apt-get update && \
 ENV DRILL_VERSION=1.20.3
 ENV DRILL_HOME=/opt/drill
 
-RUN wget https://archive.apache.org/dist/drill/drill-${DRILL_VERSION}/apache-drill-${DRILL_VERSION}.tar.gz && \
+RUN wget https://archive.apache.org/dist/drill/${DRILL_VERSION}/apache-drill-${DRILL_VERSION}.tar.gz
     tar -xzf apache-drill-${DRILL_VERSION}.tar.gz && \
     mv apache-drill-${DRILL_VERSION} ${DRILL_HOME} && \
     rm apache-drill-${DRILL_VERSION}.tar.gz
