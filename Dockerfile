@@ -43,4 +43,4 @@ WORKDIR ${DRILL_HOME}
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8047/ || exit 1
 
-CMD ["bin/drill-embedded", "--exec"]
+CMD ["bin/drillbit.sh", "run"]
