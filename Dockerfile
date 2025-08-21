@@ -18,9 +18,7 @@ RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
 
 # Создаем минимальный drill-env.sh
 RUN echo '#!/bin/bash' > ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_HEAP="-Xms32m -Xmx192m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_DIRECT_MEMORY="-XX:MaxDirectMemorySize=64m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -Xms32m -Xmx192m -XX:MaxDirectMemorySize=64m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false"' >> ${DRILL_HOME}/conf/drill-env.sh && \
     chmod +x ${DRILL_HOME}/conf/drill-env.sh
 
 # Удаляем все ненужные модули
