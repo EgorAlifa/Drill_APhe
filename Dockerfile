@@ -19,8 +19,8 @@ RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz
     rm apache-drill-1.20.3.tar.gz
 
 # Скачаем MySQL драйвер
-RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.33.jar \
-    https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.33.jar
+RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
+    https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
 
 # Копируем конфигурацию
 COPY drill-override.conf ${DRILL_HOME}/conf/
