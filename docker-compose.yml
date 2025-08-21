@@ -8,7 +8,7 @@ services:
       - "37.252.23.30:8047:8047"  # Привязка к внешнему IP
       - "37.252.23.30:31010:31010"
     environment:
-      - DRILL_JAVA_OPTS=-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms256m -Xmx512m
+      - DRILL_JAVA_OPTS=-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms128m -Xmx384m
     volumes:
       # Для персистентности логов (опционально)
       - drill_logs:/opt/drill/logs
