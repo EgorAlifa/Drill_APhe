@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-slim
+FROM openjdk:8-jdk-slim
 
 LABEL maintainer="your-email@example.com"
 LABEL description="Apache Drill 1.20.4 with Unicode literals fix"
