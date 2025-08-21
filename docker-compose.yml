@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  drill:
+    build: .
+    container_name: drill-unicode-fix
+    ports:
+      - "8047:8047"
+      - "31010:31010"
+    environment:
+      - DRILL_JAVA_OPTS=-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms1G -Xmx4G
+    volumes:
+      # Для персистентности логов (опционально)
+      - drill_logs:/opt/drill/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8047/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  drill_logs:
