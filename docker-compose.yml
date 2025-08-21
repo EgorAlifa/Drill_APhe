@@ -2,16 +2,15 @@ version: '3.8'
 
 services:
   drill:
-    image: apache/drill:latest
-    container_name: drill-unicode-fix
+    image: apache/drill:1.22.0
+    container_name: drill-service
+    command: drillbit.sh run
     ports:
-      - "37.252.23.30:8047:8047"   # Web UI
-      - "37.252.23.30:31010:31010" # JDBC/ODBC
+      - "37.252.23.30:8047:8047"
+      - "37.252.23.30:31010:31010"
     environment:
-      # Память для маленького сервера (1 GB RAM)
-      - DRILL_HEAP=384M
-      - DRILL_MAX_DIRECT_MEMORY=256M
-      # Убираем старые GC-флаги, ставим современный G1GC + фиксы для Unicode
+      - DRILL_HEAP=256M
+      - DRILL_MAX_DIRECT_MEMORY=128M
       - DRILL_JAVA_OPTS=-XX:+UseG1GC -Dfile.encoding=UTF-8 -Ddrill.exec.options.planner.parser.enable_unicode_literals=false
     volumes:
       - drill_logs:/opt/drill/log
