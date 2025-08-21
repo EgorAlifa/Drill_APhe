@@ -23,8 +23,7 @@ RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
 
 # Создадим файл настроек памяти
 RUN echo '#!/bin/bash' > ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_HEAP="-Xms64m -Xmx256m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_DIRECT_MEMORY="-XX:MaxDirectMemorySize=128m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -Xms64m -Xmx256m -XX:MaxDirectMemorySize=128m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
     chmod +x ${DRILL_HOME}/conf/drill-env.sh
 
 # Копируем конфигурацию
