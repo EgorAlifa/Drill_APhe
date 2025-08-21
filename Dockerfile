@@ -12,14 +12,6 @@ RUN apt-get update && \
 ENV DRILL_VERSION=1.20.3
 ENV DRILL_HOME=/opt/drill
 
-# Добавьте эту строку после ENV DRILL_HOME=/opt/drill
-RUN sed -i 's/-Xms4G/-Xms128m/g' ${DRILL_HOME}/conf/drill-env.sh && \
-    sed -i 's/-Xmx4G/-Xmx384m/g' ${DRILL_HOME}/conf/drill-env.sh && \
-    sed -i 's/-XX:MaxDirectMemorySize=8G/-XX:MaxDirectMemorySize=128m/g' ${DRILL_HOME}/conf/drill-env.sh
-
-COPY drill-override.conf ${DRILL_HOME}/conf/
-# Копируем конфигурацию
-COPY drill-override.conf ${DRILL_HOME}/conf/
 # Должно быть (правильно):
 RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz && \
     tar -xzf apache-drill-1.20.3.tar.gz && \
