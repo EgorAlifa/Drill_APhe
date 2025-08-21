@@ -9,7 +9,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Установим Drill 1.20.4
-ENV DRILL_VERSION=1.20.4
+ENV DRILL_VERSION=1.20.3
 ENV DRILL_HOME=/opt/drill
 
 RUN wget https://archive.apache.org/dist/drill/drill-${DRILL_VERSION}/apache-drill-${DRILL_VERSION}.tar.gz && \
