@@ -16,31 +16,13 @@ RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz
 RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
     https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
 
-# Удаляем Java 9+ параметры из всех скриптов
-RUN find ${DRILL_HOME}/bin -name "*.sh" -exec sed -i 's/--add-opens[^[:space:]]*//' {} \; && \
-    find ${DRILL_HOME}/bin -name "*.sh" -exec sed -i 's/--add-exports[^[:space:]]*//' {} \; && \
-    find ${DRILL_HOME}/bin -name "*.sh" -exec sed -i 's/-Xms[0-9][0-9]*[mMgG]/-Xms32m/g' {} \; && \
-    find ${DRILL_HOME}/bin -name "*.sh" -exec sed -i 's/-Xmx[0-9][0-9]*[mMgG]/-Xmx192m/g' {} \; && \
-    find ${DRILL_HOME}/bin -name "*.sh" -exec sed -i 's/-XX:MaxDirectMemorySize=[0-9][0-9]*[mMgG]/-XX:MaxDirectMemorySize=64m/g' {} \;
-
-# Создаем минимальный drill-env.sh
-RUN echo '#!/bin/bash' > ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -Xms32m -Xmx192m -XX:MaxDirectMemorySize=64m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false"' >> ${DRILL_HOME}/conf/drill-env.sh && \
-    chmod +x ${DRILL_HOME}/conf/drill-env.sh
-
-# Удаляем ненужные модули
-RUN rm -rf ${DRILL_HOME}/jars/drill-storage-hbase* \
-           ${DRILL_HOME}/jars/drill-storage-hive* \
-           ${DRILL_HOME}/jars/drill-storage-kafka* \
-           ${DRILL_HOME}/jars/drill-storage-mongo* \
-           ${DRILL_HOME}/jars/drill-storage-elasticsearch* \
-           ${DRILL_HOME}/jars/drill-storage-cassandra* \
-           ${DRILL_HOME}/jars/drill-kudu* \
-           ${DRILL_HOME}/jars/drill-druid* \
-           ${DRILL_HOME}/jars/drill-format-hdf5* \
-           ${DRILL_HOME}/jars/drill-format-excel* \
-           ${DRILL_HOME}/jars/drill-format-pdf* \
-           ${DRILL_HOME}/jars/drill-iceberg*
+# Создаем простой launch скрипт вместо использования оригинальных
+RUN echo '#!/bin/bash' > ${DRILL_HOME}/bin/drill-simple && \
+    echo 'export JAVA_HOME=/usr/local/openjdk-8' >> ${DRILL_HOME}/bin/drill-simple && \
+    echo 'export DRILL_JAVA_OPTS="-Xms32m -Xmx192m -XX:MaxDirectMemorySize=64m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8"' >> ${DRILL_HOME}/bin/drill-simple && \
+    echo 'cd /opt/drill' >> ${DRILL_HOME}/bin/drill-simple && \
+    echo 'exec $JAVA_HOME/bin/java $DRILL_JAVA_OPTS -cp "conf:jars/*:jars/ext/*:jars/3rdparty/*" sqlline.SqlLine -ac org.apache.drill.exec.client.DrillSqlLineApplication --color=true -u "jdbc:drill:zk=local"' >> ${DRILL_HOME}/bin/drill-simple && \
+    chmod +x ${DRILL_HOME}/bin/drill-simple
 
 # Конфигурация
 COPY drill-override.conf ${DRILL_HOME}/conf/
@@ -53,4 +35,5 @@ USER drill
 EXPOSE 8047
 WORKDIR ${DRILL_HOME}
 
-CMD ["bin/drill-embedded"]
+# Используем наш простой скрипт
+CMD ["bin/drill-simple"]
