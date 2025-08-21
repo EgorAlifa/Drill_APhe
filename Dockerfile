@@ -12,10 +12,11 @@ RUN apt-get update && \
 ENV DRILL_VERSION=1.20.3
 ENV DRILL_HOME=/opt/drill
 
-RUN wget https://archive.apache.org/dist/drill/${DRILL_VERSION}/apache-drill-${DRILL_VERSION}.tar.gz
-    tar -xzf apache-drill-${DRILL_VERSION}.tar.gz && \
-    mv apache-drill-${DRILL_VERSION} ${DRILL_HOME} && \
-    rm apache-drill-${DRILL_VERSION}.tar.gz
+# Должно быть (правильно):
+RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz && \
+    tar -xzf apache-drill-1.20.3.tar.gz && \
+    mv apache-drill-1.20.3 ${DRILL_HOME} && \
+    rm apache-drill-1.20.3.tar.gz
 
 # Скачаем MySQL драйвер
 RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.33.jar \
