@@ -1,49 +1,52 @@
-FROM openjdk:8-jdk-slim
+FROM openjdk:8-jdk-alpine
 
-LABEL maintainer="your-email@example.com"
-LABEL description="Apache Drill 1.20.3 with Unicode literals fix"
+LABEL description="Apache Drill 1.20.3 minimal for 1GB RAM"
 
-# Установим необходимые пакеты
-RUN apt-get update && \
-    apt-get install -y wget curl && \
-    rm -rf /var/lib/apt/lists/*
+# Установим только необходимое
+RUN apk add --no-cache wget curl bash
 
-# Установим Drill 1.20.3
-ENV DRILL_VERSION=1.20.3
+# Установим Drill
 ENV DRILL_HOME=/opt/drill
-
 RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz && \
     tar -xzf apache-drill-1.20.3.tar.gz && \
     mv apache-drill-1.20.3 ${DRILL_HOME} && \
     rm apache-drill-1.20.3.tar.gz
 
-# Скачаем MySQL драйвер
+# MySQL драйвер
 RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
     https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
 
-# Создадим файл настроек памяти
+# Создаем минимальный drill-env.sh
 RUN echo '#!/bin/bash' > ${DRILL_HOME}/conf/drill-env.sh && \
-    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -Xms64m -Xmx256m -XX:MaxDirectMemorySize=128m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_HEAP="-Xms32m -Xmx192m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_DIRECT_MEMORY="-XX:MaxDirectMemorySize=64m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_JAVA_OPTS="$DRILL_JAVA_OPTS -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false"' >> ${DRILL_HOME}/conf/drill-env.sh && \
     chmod +x ${DRILL_HOME}/conf/drill-env.sh
 
-# Копируем конфигурацию
+# Удаляем все ненужные модули
+RUN rm -rf ${DRILL_HOME}/jars/drill-storage-hbase* \
+           ${DRILL_HOME}/jars/drill-storage-hive* \
+           ${DRILL_HOME}/jars/drill-storage-kafka* \
+           ${DRILL_HOME}/jars/drill-storage-mongo* \
+           ${DRILL_HOME}/jars/drill-storage-elasticsearch* \
+           ${DRILL_HOME}/jars/drill-storage-cassandra* \
+           ${DRILL_HOME}/jars/drill-kudu* \
+           ${DRILL_HOME}/jars/drill-druid* \
+           ${DRILL_HOME}/jars/drill-format-hdf5* \
+           ${DRILL_HOME}/jars/drill-format-excel* \
+           ${DRILL_HOME}/jars/drill-format-pdf* \
+           ${DRILL_HOME}/jars/drill-iceberg*
+
+# Минимальная конфигурация
 COPY drill-override.conf ${DRILL_HOME}/conf/
 
-# Настройки окружения
 ENV PATH=$PATH:${DRILL_HOME}/bin
-ENV DRILL_JAVA_OPTS="-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8"
 
-# Создаем пользователя для Drill
-RUN groupadd -r drill && useradd -r -g drill drill && \
-    chown -R drill:drill ${DRILL_HOME}
-
+RUN adduser -D drill && chown -R drill:drill ${DRILL_HOME}
 USER drill
 
-EXPOSE 8047 31010
+EXPOSE 8047
 WORKDIR ${DRILL_HOME}
 
-# Здоровье контейнера
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8047/ || exit 1
-
-CMD ["bin/drill-embedded"]
+# Запуск с ограничениями памяти
+CMD ["sh", "-c", "ulimit -v 524288 && bin/drill-embedded"]
