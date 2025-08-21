@@ -1,18 +1,17 @@
 FROM openjdk:8-jdk-slim
 
 LABEL maintainer="your-email@example.com"
-LABEL description="Apache Drill 1.20.4 with Unicode literals fix"
+LABEL description="Apache Drill 1.20.3 with Unicode literals fix"
 
 # Установим необходимые пакеты
 RUN apt-get update && \
     apt-get install -y wget curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Установим Drill 1.20.4
+# Установим Drill 1.20.3
 ENV DRILL_VERSION=1.20.3
 ENV DRILL_HOME=/opt/drill
 
-# Должно быть (правильно):
 RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz && \
     tar -xzf apache-drill-1.20.3.tar.gz && \
     mv apache-drill-1.20.3 ${DRILL_HOME} && \
@@ -22,12 +21,18 @@ RUN wget https://archive.apache.org/dist/drill/1.20.3/apache-drill-1.20.3.tar.gz
 RUN wget -O ${DRILL_HOME}/jars/3rdparty/mysql-connector-java-8.0.30.jar \
     https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
 
+# Создадим файл настроек памяти
+RUN echo '#!/bin/bash' > ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_HEAP="-Xms64m -Xmx256m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    echo 'export DRILL_DIRECT_MEMORY="-XX:MaxDirectMemorySize=128m"' >> ${DRILL_HOME}/conf/drill-env.sh && \
+    chmod +x ${DRILL_HOME}/conf/drill-env.sh
+
 # Копируем конфигурацию
 COPY drill-override.conf ${DRILL_HOME}/conf/
 
 # Настройки окружения
 ENV PATH=$PATH:${DRILL_HOME}/bin
-ENV DRILL_JAVA_OPTS="-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms128m -Xmx384m"
+ENV DRILL_JAVA_OPTS="-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8"
 
 # Создаем пользователя для Drill
 RUN groupadd -r drill && useradd -r -g drill drill && \
@@ -36,7 +41,6 @@ RUN groupadd -r drill && useradd -r -g drill drill && \
 USER drill
 
 EXPOSE 8047 31010
-
 WORKDIR ${DRILL_HOME}
 
 # Здоровье контейнера
@@ -44,4 +48,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8047/ || exit 1
 
 CMD ["bin/drill-embedded"]
-
