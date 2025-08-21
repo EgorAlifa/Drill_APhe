@@ -5,8 +5,8 @@ services:
     build: .
     container_name: drill-unicode-fix
     ports:
-      - "8047:8047"
-      - "31010:31010"
+      - "37.252.23.30:8047:8047"  # Привязка к внешнему IP
+      - "37.252.23.30:31010:31010"
     environment:
       - DRILL_JAVA_OPTS=-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms1G -Xmx4G
     volumes:
