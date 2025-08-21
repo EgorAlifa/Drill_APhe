@@ -27,7 +27,7 @@ COPY drill-override.conf ${DRILL_HOME}/conf/
 
 # Настройки окружения
 ENV PATH=$PATH:${DRILL_HOME}/bin
-ENV DRILL_JAVA_OPTS="-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms1G -Xmx4G"
+ENV DRILL_JAVA_OPTS="-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms256m -Xmx512m"
 
 # Создаем пользователя для Drill
 RUN groupadd -r drill && useradd -r -g drill drill && \
