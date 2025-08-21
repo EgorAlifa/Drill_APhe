@@ -2,16 +2,19 @@ version: '3.8'
 
 services:
   drill:
-    build: .
+    image: apache/drill:latest
     container_name: drill-unicode-fix
     ports:
-      - "37.252.23.30:8047:8047"  # Привязка к внешнему IP
-      - "37.252.23.30:31010:31010"
+      - "37.252.23.30:8047:8047"   # Web UI
+      - "37.252.23.30:31010:31010" # JDBC/ODBC
     environment:
-      - DRILL_JAVA_OPTS=-Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8 -Xms128m -Xmx384m
+      # Память для маленького сервера (1 GB RAM)
+      - DRILL_HEAP=384M
+      - DRILL_MAX_DIRECT_MEMORY=256M
+      # Убираем старые GC-флаги, ставим современный G1GC + фиксы для Unicode
+      - DRILL_JAVA_OPTS=-XX:+UseG1GC -Dfile.encoding=UTF-8 -Ddrill.exec.options.planner.parser.enable_unicode_literals=false
     volumes:
-      # Для персистентности логов (опционально)
-      - drill_logs:/opt/drill/logs
+      - drill_logs:/opt/drill/log
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8047/"]
