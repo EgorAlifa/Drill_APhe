@@ -21,7 +21,7 @@ RUN echo '#!/bin/bash' > ${DRILL_HOME}/bin/drill-simple && \
     echo 'export JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk' >> ${DRILL_HOME}/bin/drill-simple && \
     echo 'export DRILL_JAVA_OPTS="-Xms32m -Xmx192m -XX:MaxDirectMemorySize=64m -XX:+UseSerialGC -XX:MaxMetaspaceSize=64m -Ddrill.exec.options.planner.parser.enable_unicode_literals=false -Dfile.encoding=UTF-8"' >> ${DRILL_HOME}/bin/drill-simple && \
     echo 'cd /opt/drill' >> ${DRILL_HOME}/bin/drill-simple && \
-    echo 'exec /usr/bin/java $DRILL_JAVA_OPTS -cp "conf:jars/*:jars/ext/*:jars/3rdparty/*" sqlline.SqlLine -ac org.apache.drill.exec.client.DrillSqlLineApplication --color=true -u "jdbc:drill:zk=local"' >> ${DRILL_HOME}/bin/drill-simple && \
+    echo 'exec /usr/bin/java $DRILL_JAVA_OPTS -cp "conf:jars/*:jars/ext/*:jars/3rdparty/*" org.apache.drill.exec.server.Drillbit' >> ${DRILL_HOME}/bin/drill-simple && \
     chmod +x ${DRILL_HOME}/bin/drill-simple
 
 # Конфигурация
